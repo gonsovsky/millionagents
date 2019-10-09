@@ -8,28 +8,53 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"sync/atomic"
 )
+
 var (
-	K = *flag.Int("k", 5, "Max degree of parallelism")
+	K = *flag.Int("k", 3, "Max degree of parallelism")
 )
 
-func main(){
+func main() {
 	var input = make(chan string)
-
-	go func(){
+	go func() {
+		input <- "http://golang.org"
+		input <- "http://golang.org"
+		input <- "http://golang.org"
+		input <- "http://golang.org"
+	}()
+	go func() {
 		var semaphore = make(chan bool, K)
-		for item := range input {
-			semaphore <- true
-			go func(item string) {
-				defer func() { <-semaphore }()
-				work(item)
-			}(item)
+		var total int32 = 0
+		for {
+			select {
+			case item, ok := <-input:
+				if ok {
+					semaphore <- true
+					go func(item string) {
+						defer func() {
+							<-semaphore
+						}()
+						work(item)
+						atomic.AddInt32(&total, 1)
+					}(item)
+				} else {
+					//nothing
+				}
+			default:
+				if x := atomic.LoadInt32(&total); x != 0 && len(semaphore) == 0 {
+					log.Printf("Processed: %v\nPush new urls, please:\n", x)
+					atomic.StoreInt32(&total, 0)
+				}
+			}
 		}
 	}()
 
 	scanner := bufio.NewScanner(os.Stdin)
-	for scanner.Scan() {
-		input <- scanner.Text()
+	for {
+		if scanner.Scan() {
+			input <- scanner.Text()
+		}
 	}
 }
 
@@ -45,7 +70,7 @@ func work(item string) {
 	if err != nil {
 		log.Println(err)
 	}
-	re := regexp.MustCompile( "\\b(Go)\\b")
+	re := regexp.MustCompile("\\b(Go)\\b")
 	var cnt = re.FindAllIndex(bytes, len(bytes))
 	log.Printf("%s: %v", item, len(cnt))
 }
