@@ -12,17 +12,11 @@ import (
 )
 
 var (
-	K = *flag.Int("k", 3, "Max degree of parallelism")
+	K = *flag.Int("k", 5, "Max degree of parallelism")
 )
 
 func main() {
 	var input = make(chan string)
-	go func() {
-		input <- "http://golang.org"
-		input <- "http://golang.org"
-		input <- "http://golang.org"
-		input <- "http://golang.org"
-	}()
 	go func() {
 		var semaphore = make(chan bool, K)
 		var total int32 = 0
