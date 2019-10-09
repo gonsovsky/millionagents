@@ -1,0 +1,8 @@
+http://golang.org
+http://yandex.ru
+http://rambler.ru
+http://my.com
+http://golang.org
+http://yandex.ru
+http://rambler.ru
+http://my.com

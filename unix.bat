@@ -1,0 +1,1 @@
+echo -e 'https://golang.org\nhttps://yandex.ru\https://golang.org\nhttps://yandex.ru\nhttps://golang.org\nhttps://yandex.ru\nhttps://golang.org\nhttps://yandex.ru' | go run main.go
