@@ -37,8 +37,8 @@ func main() {
 				}
 			default:
 				if x := atomic.LoadInt32(&total); x != 0 && len(semaphore) == 0 {
-					log.Printf("Processed: %v urls.\n", x)
 					atomic.StoreInt32(&total, 0)
+					log.Printf("Processed: %v urls.\n", x)
 				}
 			}
 		}
